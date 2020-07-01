@@ -1,6 +1,9 @@
 #pragma once
 #include <iostream>    // printf()
 #include <chrono>
+#include <cstdlib>
+#include <cstring>
+
 using namespace std;
 
 class Stopwatch

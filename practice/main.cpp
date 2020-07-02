@@ -1,8 +1,8 @@
 ﻿#include "Stopwatch.h"
 
-int compare(const void * x1, const void * x2);
-void heapify(int arr[], int n, int i);
-void heapSort(int arr[], int n);
+int compare(const void * x1, const void * x2);// функция сравнения элементов массива
+void help_sort(int arr[], int n, int i);//вспомогательная функция для сортировки
+void heapSort(int arr[], int n);// сортировка древесным методом
 
 int main(int argc, char* argv[])
 {
@@ -13,12 +13,12 @@ int main(int argc, char* argv[])
 	int* buff;// массив для копирования
 	double counter[10]; // сюда будем сохранять промежуточные данные вычисленного времени
 	double sum=0; // среднее значение по времени
-	int i, j, n, m;
+	int i, j, n;
 	i = 0;
 	j = 0;
 	n = 100;
 	// 1-ое испытание сортировка массива на 1000 эл-ов
-	for (j = 0; j < 4; j++) {
+	for (j = 0; j < 4; j++) { // будет проведено 4 испытания с разной размерностью массивов
 		n = n*10;
 		mass = new int[n];
 		buff = new int[n];
@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
 			buff[i] = rand() % 1000 - rand() % 1000; // заполняем массив случайными значениями в диапазоне от -999 до 999 включительно
 		}
 		//начало
-		cout << "Испытание№" << j << "массив из " << n << " элементов" <<endl;
+		cout << endl << "Испытание № " << j << "  массив из " << n << " элементов " << endl;
 
 		cout << endl << "Сортировка с помощью древестного алгоритма:" << endl;
 		for (i = 0; i < 10; i++)
@@ -36,14 +36,21 @@ int main(int argc, char* argv[])
 			timer = new Stopwatch; // начинаем отсчёт 
 			//далее алгоритм древестной(пирамидальной) сортировки
 			heapSort(mass, n);
-			counter[i] = timer->stop().duration<Stopwatch::mks>(); // отсчёт закончен
-			cout << "Проход № " << i << "  Время: " << counter[i] << " mks"<< endl;
+			if (j==0){
+				counter[i] = timer->stop().duration<Stopwatch::mks>(); // отсчёт закончен / заносим время в массив- накопитель
+				cout << "Проход № " << i << "  Время: " << counter[i] << " mks" << endl;
+			}
+			else {
+				counter[i] = timer->stop().duration<Stopwatch::ms>(); // отсчёт закончен / заносим время в массив- накопитель
+				cout << "Проход № " << i << "  Время: " << counter[i] << " ms" << endl;
+			}
 			delete timer;
 		}
 		for (i = 0; i < 10; i++)
 			sum += counter[i];
-		cout << "Среднее время за которое был отсортирован массив из " << n << " элементов:" << sum << " mks" << endl;
-
+		sum = sum / 10;
+		cout << "Среднее время за которое был отсортирован массив из " << n << " элементов:" << sum << " ms" << endl;
+		sum = 0;
 		cout << endl << "Сортировка с помощью qsort:" << endl;
 		for (i = 0; i < 10; i++)
 		{
@@ -51,13 +58,20 @@ int main(int argc, char* argv[])
 			timer = new Stopwatch; // начинаем отсчёт 
 			//далее сортировка с помощью qsort
 			qsort(mass, n, sizeof(int), compare);
-			counter[i] = timer->stop().duration<Stopwatch::mks>(); // отсчёт закончен
-			cout << "Проход № " << i << "  Время: " << counter[i] << " mks" << endl;
+			if (j == 0) {
+				counter[i] = timer->stop().duration<Stopwatch::mks>(); // отсчёт закончен / заносим время в массив- накопитель
+				cout << "Проход № " << i << "  Время: " << counter[i] << " mks" << endl;
+			}
+			else {
+				counter[i] = timer->stop().duration<Stopwatch::ms>(); // отсчёт закончен / заносим время в массив- накопитель
+				cout << "Проход № " << i << "  Время: " << counter[i] << " ms" << endl;
+			}
 			delete timer;
 		}
 		for (i = 0; i < 10; i++)
 			sum += counter[i];
-		cout << "Среднее время за которое был отсортирован массив из " << n << " элементов:" << sum << " mks" << endl;
+		sum = sum / 10;
+		cout << "Среднее время за которое был отсортирован массив из " << n << " элементов:" << sum << " ms" << endl;
 
 		delete[] mass;
 		delete[] buff;
@@ -70,28 +84,28 @@ int compare(const void * x1, const void * x2)   // функция сравнен
 	return (*(int*)x1 - *(int*)x2);              // если результат вычитания равен 0, то числа равны, < 0: x1 < x2; > 0: x1 > x2
 }
 
-void heapify(int arr[], int n, int i)
+void help_sort(int mass[], int n, int i)
 {
-	int largest = i;
+	int max = i;
 	// Инициализируем наибольший элемент как корень
-	int l = 2 * i + 1; // левый = 2*i + 1
-	int r = 2 * i + 2; // правый = 2*i + 2
+	int left = 2 * i + 1; // левый = 2*i + 1
+	int right = 2 * i + 2; // правый = 2*i + 2
 
  // Если левый дочерний элемент больше корня
-	if (l < n && arr[l] > arr[largest])
-		largest = l;
+	if (left < n && mass[left] > mass[max])
+		max = left;
 
 	// Если правый дочерний элемент больше, чем самый большой элемент на данный момент
-	if (r < n && arr[r] > arr[largest])
-		largest = r;
+	if (right < n && mass[right] > mass[max])
+		max = right;
 
 	// Если самый большой элемент не корень
-	if (largest != i)
+	if (max != i)
 	{
-		swap(arr[i], arr[largest]);
+		swap(mass[i], mass[max]);
 
 		// Рекурсивно преобразуем в двоичную кучу затронутое поддерево
-		heapify(arr, n, largest);
+		help_sort(mass, n, max);
 	}
 }
 
@@ -100,7 +114,7 @@ void heapSort(int arr[], int n)
 {
 	// Построение кучи (перегруппируем массив)
 	for (int i = n / 2 - 1; i >= 0; i--)
-		heapify(arr, n, i);
+		help_sort(arr, n, i);
 
 	// Один за другим извлекаем элементы из кучи
 	for (int i = n - 1; i >= 0; i--)
@@ -109,6 +123,6 @@ void heapSort(int arr[], int n)
 		swap(arr[0], arr[i]);
 
 		// вызываем процедуру heapify на уменьшенной куче
-		heapify(arr, i, 0);
+		help_sort(arr, i, 0);
 	}
 }

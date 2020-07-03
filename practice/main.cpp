@@ -13,10 +13,12 @@ int main(int argc, char* argv[])
 	int* buff;// массив для копирования
 	double counter[10]; // сюда будем сохранять промежуточные данные вычисленного времени
 	double sum=0; // среднее значение по времени
-	int i, j, n;
+	int i, j, n,m=0;
+	bool flag;
 	i = 0;
 	j = 0;
 	n = 100;
+	flag = true;
 	// 1-ое испытание сортировка массива на 1000 эл-ов
 	for (j = 0; j < 4; j++) { // будет проведено 4 испытания с разной размерностью массивов
 		n = n*10;
@@ -28,51 +30,39 @@ int main(int argc, char* argv[])
 		}
 		//начало
 		cout << endl << "Испытание № " << j << "  массив из " << n << " элементов " << endl;
-
-		cout << endl << "Сортировка с помощью древестного алгоритма:" << endl;
-		for (i = 0; i < 10; i++)
-		{
-			memcpy(mass, buff, sizeof(int)*n);// заранее сохранёный массив копируется в нужный нам
-			timer = new Stopwatch; // начинаем отсчёт 
-			//далее алгоритм древестной(пирамидальной) сортировки
-			heapSort(mass, n);
-			if (j==0){
-				counter[i] = timer->stop().duration<Stopwatch::mks>(); // отсчёт закончен / заносим время в массив- накопитель
-				cout << "Проход № " << i << "  Время: " << counter[i] << " mks" << endl;
+		for (m = 0; m < 2; m++) { // для каждого испытания две сортировки
+			if (m == 0)
+				cout << endl << "Сортировка с помощью древестного алгоритма:" << endl;
+			else
+				cout << endl << "Сортировка с помощью функции qsort:" << endl;
+			for (i = 0; i < 10; i++) // всего 10 проходов
+			{
+				memcpy(mass, buff, sizeof(int)*n);// заранее сохранёный массив копируется в нужный нам
+				timer = new Stopwatch; // начинаем отсчёт 
+				//далее алгоритм древестной(пирамидальной)/qsort сортировки
+				if (m==0)
+					heapSort(mass, n);
+				else
+					qsort(mass, n, sizeof(int), compare);
+				if (j == 0) {
+					counter[i] = timer->stop().duration<Stopwatch::mks>(); // для 1-го испытания в mks, т.к. происходит очень быстро
+					cout << "Проход № " << i << "  Время: " << counter[i] << " mks" << endl;
+				}
+				else {
+					counter[i] = timer->stop().duration<Stopwatch::ms>(); // отсчёт закончен / заносим время в массив- накопитель
+					cout << "Проход № " << i << "  Время: " << counter[i] << " ms" << endl;
+				}
+				delete timer;
 			}
-			else {
-				counter[i] = timer->stop().duration<Stopwatch::ms>(); // отсчёт закончен / заносим время в массив- накопитель
-				cout << "Проход № " << i << "  Время: " << counter[i] << " ms" << endl;
-			}
-			delete timer;
+			for (i = 0; i < 10; i++) 
+				sum += counter[i];
+			sum = sum / 10; // считаем среденее арифметическое
+			if (j == 0)
+				cout << "Среднее время за которое был отсортирован массив из " << n << " элементов:" << sum << " mks" << endl;
+			else
+				cout << "Среднее время за которое был отсортирован массив из " << n << " элементов:" << sum << " ms" << endl;
+			sum = 0;
 		}
-		for (i = 0; i < 10; i++)
-			sum += counter[i];
-		sum = sum / 10;
-		cout << "Среднее время за которое был отсортирован массив из " << n << " элементов:" << sum << " ms" << endl;
-		sum = 0;
-		cout << endl << "Сортировка с помощью qsort:" << endl;
-		for (i = 0; i < 10; i++)
-		{
-			memcpy(mass, buff, sizeof(int)*n);// заранее сохранёный массив копируется в нужный нам
-			timer = new Stopwatch; // начинаем отсчёт 
-			//далее сортировка с помощью qsort
-			qsort(mass, n, sizeof(int), compare);
-			if (j == 0) {
-				counter[i] = timer->stop().duration<Stopwatch::mks>(); // отсчёт закончен / заносим время в массив- накопитель
-				cout << "Проход № " << i << "  Время: " << counter[i] << " mks" << endl;
-			}
-			else {
-				counter[i] = timer->stop().duration<Stopwatch::ms>(); // отсчёт закончен / заносим время в массив- накопитель
-				cout << "Проход № " << i << "  Время: " << counter[i] << " ms" << endl;
-			}
-			delete timer;
-		}
-		for (i = 0; i < 10; i++)
-			sum += counter[i];
-		sum = sum / 10;
-		cout << "Среднее время за которое был отсортирован массив из " << n << " элементов:" << sum << " ms" << endl;
-
 		delete[] mass;
 		delete[] buff;
 	}
